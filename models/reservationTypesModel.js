@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const reservationTypesModel = new Schema({
-  type: {
+  reservationType: {
     type: String,
     required: true,
   },
   amount: {
-    type: String,
+    type: Number,
     requires: true,
   },
   availability: {

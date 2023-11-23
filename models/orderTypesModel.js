@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const orderTypesModel = new Schema({
-  type: {
+  orderTypesModelype: {
     type: String,
     required: true,
   },

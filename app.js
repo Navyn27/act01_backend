@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 
 mongoose.set("strictQuery", true);
 
-const routesToNotes = require("./routes/routes");
+const routesForwarding = require("./routes/routes");
 
 app.use(express.json());
 
@@ -20,13 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/", routesToNotes);
-
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     app.listen(4000, () => {
       console.log("Up and running on port 4000");
+
+      app.use("/", routesForwarding);
     });
   })
   .catch((err) => console.log(err));

@@ -7,10 +7,12 @@ const usersSchema = new Schema(
     username: {
       type: String,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
       required: true,
+      unique: true,
     },
     userType: {
       type: Schema.Types.ObjectId,
@@ -20,6 +22,7 @@ const usersSchema = new Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
     },
   },
   {
@@ -27,4 +30,4 @@ const usersSchema = new Schema(
   }
 );
 
-module.export = mongoose.model("User", usersSchema);
+module.exports = mongoose.model("User", usersSchema);

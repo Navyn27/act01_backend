@@ -1,6 +1,3 @@
-//For reviews
-const reviewsModel = require("../models/reviewsModel");
-
 //For orders
 const ordersModel = require("../models/ordersModel");
 const orderTypesModel = require("../models/orderTypesModel");
@@ -9,32 +6,7 @@ const orderTypesModel = require("../models/orderTypesModel");
 const reservationsModel = require("../models/reservationsModel");
 const reservationTypesModel = require("../models/reservationTypesModel");
 
-//For users
-const usersModels = require("../models/usersModel");
-const userTypesModel = require("../models/userTypesModel");
-
-//For activity logs
-const actionsModel = require("../models/actionsModel");
-const logsModel = require("../models/logsModel");
-
-//To record reviews
-const addNewReview = (req, res) => {
-  const { title, userFirstName, userEmail, body, rating, relevantDate } =
-    req.body;
-
-  reviewsModel
-    .create({ title, userFirstName, userEmail, body, rating, relevantDate })
-    .then(() => {
-      res.status(200).json("Review Recorded");
-    })
-    .catch((err) => {
-      res.status(400).json(err.message);
-    });
-};
-
-//To handle services (orders and reservations)
-
-const addNewService = (service, req, res) => {
+const requestService = (service, req, res) => {
   const { userFirstName, userLastName, phoneNumber, email } = req.body;
 
   const data = {
@@ -53,7 +25,6 @@ const addNewService = (service, req, res) => {
         .create(data)
         .then(() => {
           res.status(200).json("Success");
-          //Record Log
         })
         .catch((err) => {
           res.status(400).json(err.message);
@@ -207,45 +178,43 @@ const cancelService = (service, req, res) => {
   }
 };
 
-//Manager user
-//Register a new user
-//Change user account type
-//
+const registerServiceType = (service, req, res) => {
+  const { type, availability } = req.body;
 
-const registerUser = (req, res) => {
-  const { username, password, userType, email } = req.params;
-
-  userTypesModel.find({ userType }, (err, data) => {
-    if (err) {
-      res.status(400).json("Invalid user type");
-    } else {
-      usersModels
-        .create({ username, password, userType: data, email })
+  const data = { type, availability };
+  switch (service) {
+    case "reservation":
+      reservationTypesModel
+        .create({ ...data, amount: req.body, amount })
         .then(() => {
-          res.status(200).json({ message: "User registration successful" });
+          res
+            .status(200)
+            .json({ message: "Reservation Type Created Successfully" });
         })
         .catch((err) => {
-          res.status(400).json({ error: err.message });
+          res.status(400).json({ message: err.message });
         });
-    }
-  });
+    case "order":
+      orderTypesModel
+        .create(data)
+        .then(() => {
+          res
+            .status(200)
+            .json({ message: "Reservation Type Created Successfully" });
+        })
+        .catch((err) => {
+          res.status(400).json({ message: err.message });
+        });
+    default:
+      res.status(404).json({ message: "Invalid Service Type" });
+  }
 };
 
-const updateUser = (req, res) => {};
-const deleteuser = (req, res) => {};
-
-//Handle actions or activities
-const registerAction = (req, res) => {};
-
 module.exports = {
-  addNewReview,
-  addNewService,
+  requestService,
   confirmService,
   resolveService,
   resolveServicePayment,
+  registerServiceType,
   cancelService,
-  registerUser,
-  updateUser,
-  deleteuser,
-  registerAction,
 };
