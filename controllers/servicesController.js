@@ -17,11 +17,10 @@ const requestService = (service, req, res) => {
     status: "pending",
     paymentStatus: "pending",
   };
+
   switch (service) {
     case "order":
-      //Find Order Type
-
-      reservationsModel
+      ordersModel
         .create(data)
         .then(() => {
           res.status(200).json("Success");
@@ -55,7 +54,7 @@ const confirmService = (service, req, res) => {
   const { serviceId, userId } = req.body;
 
   //Check if the user is verified to perform such an action
-
+  console.log(service);
   switch (service) {
     case "order":
       ordersModel
@@ -118,7 +117,6 @@ const resolveServicePayment = (service, req, res) => {
   const { serviceId, userId } = req.body;
 
   //Check if the user is verified to perform such an action
-
   //Confirm order
   switch (service) {
     case "order":
@@ -178,36 +176,34 @@ const cancelService = (service, req, res) => {
   }
 };
 
-const registerServiceType = (service, req, res) => {
-  const { type, availability } = req.body;
+const registerReservationType = (req, res) => {
+  const { reservationType, availability } = req.body;
 
-  const data = { type, availability };
-  switch (service) {
-    case "reservation":
-      reservationTypesModel
-        .create({ ...data, amount: req.body, amount })
-        .then(() => {
-          res
-            .status(200)
-            .json({ message: "Reservation Type Created Successfully" });
-        })
-        .catch((err) => {
-          res.status(400).json({ message: err.message });
-        });
-    case "order":
-      orderTypesModel
-        .create(data)
-        .then(() => {
-          res
-            .status(200)
-            .json({ message: "Reservation Type Created Successfully" });
-        })
-        .catch((err) => {
-          res.status(400).json({ message: err.message });
-        });
-    default:
-      res.status(404).json({ message: "Invalid Service Type" });
-  }
+  const data = { reservationType, availability };
+  reservationTypesModel
+    .create(data)
+    .then(() => {
+      res
+        .status(200)
+        .json({ message: "Reservation Type Created Successfully" });
+    })
+    .catch((err) => {
+      res.status(400).json({ message: err.message });
+    });
+};
+
+const registerOrderType = (req, res) => {
+  const { orderType, availability } = req.body;
+
+  const data = { orderType, availability };
+  orderTypesModel
+    .create(data)
+    .then(() => {
+      res.status(200).json({ message: "Order Type Created Successfully" });
+    })
+    .catch((err) => {
+      res.status(400).json({ message: err.message });
+    });
 };
 
 module.exports = {
@@ -215,6 +211,7 @@ module.exports = {
   confirmService,
   resolveService,
   resolveServicePayment,
-  registerServiceType,
+  registerReservationType,
+  registerOrderType,
   cancelService,
 };

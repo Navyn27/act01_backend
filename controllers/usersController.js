@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
 //For users
 const usersModel = require("../models/usersModel");
@@ -24,31 +24,39 @@ const registerUser = (req, res) => {
 
   //Remember to validate password, check username validity and email validity on Frontend before making request
 
-  bcrypt.hash(password, Number(process.env.SALT_INT), (err, hashedPassword) => {
-    if (err) {
+  bcrypt
+    .hash(password, Number(process.env.SALT_INT))
+    .then((hashedPassword) => {
+      userTypesModel.findOne({ userType: userType }, (err, data) => {
+        console.log(userType);
+        if (err) {
+          console.log(err);
+          res.status(500).json(err.message);
+        }
+        if (!data) {
+          res.status(400).json({ Error: "Invalid user type" });
+        } else {
+          console.log({ username, hashedPassword, userType: data, email });
+          usersModel
+            .create({
+              username,
+              password: hashedPassword,
+              userType: data,
+              email,
+            })
+            .then(() => {
+              res.status(200).json({ message: "User registration successful" });
+            })
+            .catch((err) => {
+              res.status(400).json({ error: err });
+            });
+        }
+      });
+    })
+    .catch((err) => {
       console.log(err);
-      res.status(500).json({ error: err });
-    } else {
-      console.log(hashedPassword);
-      res.end();
-    }
-  });
-
-  // userTypesModel.findOne({ userType }, async (err, data) => {
-  //   if (err) {
-  //     res.status(400).json("Invalid user type");
-  //   } else {
-  //     // console.log({ username, password, data, email });
-  //     const user = await usersModel
-  //       .create({ username, hashedPassword, userType: data, email })
-  //       .then(() => {
-  //         res.status(200).json({ message: "User registration successful" });
-  //       })
-  //       .catch((err) => {
-  //         res.status(400).json({ error: err.message });
-  //       });
-  //   }
-  // });
+      res.status(500).json({ Error: "Internal Server Error" });
+    });
 };
 
 //Update user
@@ -59,34 +67,46 @@ const updateUser = (req, res) => {
     email,
     newUsername,
     newPassword,
-    newEmail,
     newUserType,
-  } = req.body;
+    newEmail,
+  } = req.body[0];
 
-  if (newUserType) {
-    userTypesModel.findOne({ userType: newUserType }).then((results) => {
-      newUserType = results;
-    });
-  } else {
-    newUserType = "";
-  }
-
-  usersModels
-    .findOneAndUpdate(
-      { username: username, password: password, email: email },
-      {
-        username: newUsername,
-        password: newPassword,
-        email: newEmail,
-        userTypes: newUserType,
+  usersModel
+    .findOne({ username, email })
+    .then((data) => {
+      if (data) {
+        const storedPassword = data.password;
+        userTypesModel.findOne({ userType: newUserType }).then((userType) => {
+          bcrypt.compare(password, storedPassword).then((result) => {
+            if (result) {
+              bcrypt
+                .hash(newPassword, Number(process.env.SALT_INT))
+                .then((hashedPassword) => {
+                  usersModel
+                    .findByIdAndUpdate(data._id, {
+                      username: newUsername,
+                      password: hashedPassword,
+                      userType,
+                      email: newEmail,
+                    })
+                    .then(() => {
+                      res
+                        .status(200)
+                        .json({ Message: "User Updation Successfull" });
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      res.status(500).json({ err: err.message });
+                    });
+                });
+            } else {
+              res.status(400).json({ Error: "Wrong credentials" });
+            }
+          });
+        });
       }
-    )
-    .then(() => {
-      res.status(200).json({ message: "User registration successful" });
     })
-    .catch((err) => {
-      res.status(400).json({ error: err.message });
-    });
+    .catch((err) => {});
 };
 
 //Delete user
