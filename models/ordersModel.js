@@ -14,7 +14,7 @@ const ordersSchema = new Schema(
       required: true,
     },
     userLastName: {
-      type: Array,
+      type: String,
       required: true,
     },
     phoneNumber: {

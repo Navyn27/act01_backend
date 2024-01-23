@@ -11,11 +11,11 @@ const {
   registerReservationType,
 } = require("../controllers/servicesController");
 
-router.post("/service", (req, res) => {
-  requestService("order", req, res);
+router.post("/", (req, res) => {
+  requestService(req, res);
 });
 
-router.patch("/service", (req, res) => {
+router.patch("/", (req, res) => {
   confirmService(req, res);
 });
 router.post("/cancelService", (req, res) => {

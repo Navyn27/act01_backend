@@ -6,9 +6,10 @@ const orderTypesModel = require("../models/orderTypesModel");
 const reservationsModel = require("../models/reservationsModel");
 const reservationTypesModel = require("../models/reservationTypesModel");
 
-const requestService = (service, req, res) => {
-  const { userFirstName, userLastName, phoneNumber, email } = req.body;
+const requestService = (req, res) => {
+  const { service, userFirstName, userLastName, phoneNumber, email } = req.body;
 
+  console.log(req.body);
   const data = {
     userFirstName,
     userLastName,
@@ -20,34 +21,40 @@ const requestService = (service, req, res) => {
 
   switch (service) {
     case "order":
-      ordersModel
-        .create(data)
-        .then(() => {
-          res.status(200).json("Success");
-        })
-        .catch((err) => {
-          res.status(400).json(err.message);
-        });
-    case "reservation":
-      //Find Reservation Type
+      const { orderType } = req.body;
 
-      reservationsModel
-        .create({
-          ...data,
-          startDate: req.body.startDate,
-          endDate: req.body.endDate,
-        })
-        .then(() => {
-          res.status(200).json("Service Requested Successfully");
-          //Record Log
-        })
-        .catch((err) => {
-          res.status(400).json(err.message);
-        });
+      orderTypesModel.findOne({ orderType }).then((results) => {
+        if (results.availability) {
+          ordersModel.create({ ...data, orderType: results._id }).then(() => {
+            console.log("working");
+            res.status(200).json("Order created successfully");
+          });
+        } else {
+          res.status(200).json("Service Currently unavailable");
+        }
+      });
+      break;
+
+    case "reservation":
+      const { reservationType } = req.body;
+
+      reservationTypesModel.findOne({ reservationType }).then((results) => {
+        console.log(results);
+        if (results.availability) {
+          ordersModel
+            .create({ ...data, reservationType: results._id })
+            .then(() => {
+              console.log("working");
+              res.status(200).json("Reservation created successfully");
+            });
+        } else {
+          res.status(200).json("Service Currently unavailable");
+        }
+      });
+      break;
     default:
       res.status(400).json("Invalid service request");
   }
-  ordersModel.create({ ...data, status: "pending", paymentStatus: "pending" });
 };
 
 const confirmService = (service, req, res) => {
