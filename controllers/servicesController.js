@@ -24,160 +24,218 @@ const requestService = (req, res) => {
       const { orderType } = req.body;
 
       orderTypesModel.findOne({ orderType }).then((results) => {
-        if (results.availability) {
+        if (results && results.availability) {
           ordersModel.create({ ...data, orderType: results._id }).then(() => {
-            console.log("working");
+            console.log("Order created successfully");
             res.status(200).json("Order created successfully");
           });
+        } else if (!results) {
+          console.log("Invalid Service Request");
+          res.status(400).json("Invalid Service Request");
         } else {
+          console.log("Service Currently Unavailable");
           res.status(200).json("Service Currently unavailable");
         }
       });
       break;
 
     case "reservation":
-      const { reservationType } = req.body;
+      const { reservationType, startDate, endDate } = req.body;
 
       reservationTypesModel.findOne({ reservationType }).then((results) => {
         console.log(results);
-        if (results.availability) {
-          ordersModel
-            .create({ ...data, reservationType: results._id })
+        if (results && results.availability) {
+          reservationsModel
+            .create({
+              ...data,
+              reservationType: results._id,
+              startDate,
+              endDate,
+            })
             .then(() => {
-              console.log("working");
+              console.log("Reservation created successfully");
               res.status(200).json("Reservation created successfully");
             });
+        } else if (!results) {
+          console.log("Invalid Service Request");
+          res.status(400).json("Invalid Service Request");
         } else {
+          console.log("Service Currently Unavailable");
           res.status(200).json("Service Currently unavailable");
         }
       });
+
       break;
     default:
       res.status(400).json("Invalid service request");
   }
 };
 
-const confirmService = (service, req, res) => {
-  const { serviceId, userId } = req.body;
+const confirmService = (req, res) => {
+  const { serviceId, userId, service } = req.body;
 
   //Check if the user is verified to perform such an action
-  console.log(service);
+  //Do the action
+  //Record log
+
   switch (service) {
     case "order":
       ordersModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Confirmed" })
-        .then(() => {
-          res.status(200).json("Success");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Confirmed");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     case "reservation":
       reservationsModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Confirmed" })
-        .then(() => {
-          res.status(200).json("Service Request Confirmed");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Confirmed");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     default:
       res.status(400).json("Invalid service request");
   }
 };
 
-const resolveService = (service, req, res) => {
-  const { serviceId, userId } = req.body;
+const resolveService = (req, res) => {
+  const { serviceId, userId, service } = req.body;
 
   //Check if the user is verified to perform such an action
+  //Do the action
+  //Record log
 
-  //Confirm order
   switch (service) {
     case "order":
       ordersModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Resolved" })
-        .then(() => {
-          res.status(200).json("Success");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Resolved");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     case "reservation":
       reservationsModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Resolved" })
-        .then(() => {
-          res.status(200).json("Service Resolved Successfully");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Resolved");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     default:
       res.status(400).json("Invalid service request");
   }
 };
 
-const resolveServicePayment = (service, req, res) => {
-  const { serviceId, userId } = req.body;
+const resolveServicePayment = (req, res) => {
+  const { service, serviceId, userId } = req.body;
 
   //Check if the user is verified to perform such an action
-  //Confirm order
+  //Resolve service payment
+  //Record log
+
+  console.log(req.body);
+
   switch (service) {
     case "order":
       ordersModel
         .findByIdAndUpdate({ _id: serviceId }, { paymentStatus: "Resolved" })
-        .then(() => {
-          res.status(200).json("Success");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            console.log("Service Payment Resolved");
+            res.status(200).json("Service Payment Resolved");
+          } else {
+            cconsole.log("Service Payment Resolved");
+            res.status(400).json("Service not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     case "reservation":
       reservationsModel
         .findByIdAndUpdate({ _id: serviceId }, { paymentStatus: "Resolved" })
-        .then(() => {
-          res.status(200).json("Service Payment Resolved Successfully");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            console.log("Service Payment Resolved");
+            res.status(200).json("Service Payment Resolved");
+          } else {
+            res.status(400).json("Service not found");
+          }
         })
         .catch((err) => {
+          console.log("Service Payment Resolved");
           res.status(400).json(err.message);
         });
+      break;
     default:
       res.status(400).json("Invalid service request");
   }
 };
 
-const cancelService = (service, req, res) => {
-  const { serviceId, userId } = req.body;
+const cancelService = (req, res) => {
+  const { serviceId, userId, service } = req.body;
 
   //Check if the user is verified to perform such an action
+  //Do the action
+  //Record log
 
-  //Confirm order
   switch (service) {
     case "order":
       ordersModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Cancelled" })
-        .then(() => {
-          res.status(200).json("Success");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Cancelled");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     case "reservation":
       reservationsModel
         .findByIdAndUpdate({ _id: serviceId }, { status: "Cancelled" })
-        .then(() => {
-          res.status(200).json("Service Cancellation Successfull");
-          //Record Log
+        .then((results) => {
+          if (results) {
+            res.status(200).json("Service Request Cancelled");
+          } else {
+            res.status(400).json("Service request not found");
+          }
         })
         .catch((err) => {
           res.status(400).json(err.message);
         });
+      break;
     default:
       res.status(400).json("Invalid service request");
   }

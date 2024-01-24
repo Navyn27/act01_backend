@@ -18,11 +18,11 @@ router.post("/", (req, res) => {
 router.patch("/", (req, res) => {
   confirmService(req, res);
 });
-router.post("/cancelService", (req, res) => {
+router.post("/cancel", (req, res) => {
   cancelService(req, res);
 });
 
-router.post("/resolveService", (req, res) => {
+router.post("/resolve", (req, res) => {
   resolveService(req, res);
 });
 
@@ -34,7 +34,7 @@ router.post("/reservationType", (req, res) => {
   registerReservationType(req, res);
 });
 
-router.patch("/resolveServicePay", (req, res) => {
+router.post("/resolvePayment", (req, res) => {
   resolveServicePayment(req, res);
 });
 
